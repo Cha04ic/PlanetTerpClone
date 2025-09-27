@@ -1,2 +1,3 @@
-Basically recreating UMD's student-made course + professor lookup/review website from scratch using data from their APIs. This is not at all meant to take credit from their work, it is simply something I wanted to do for fun
-to explore JS and Python frameworks/libraries.
+Recreating UMD’s student-made course & professor lookup/review site for learning purposes. Built to explore modern Python + JS stacks, data ingestion, and search.
+
+Disclaimer: This project is not affiliated with or endorsed by the University of Maryland or PlanetTerp. All names and trademarks belong to their owners. Data is used for educational, non-commercial purposes and follows the terms of the respective APIs.
