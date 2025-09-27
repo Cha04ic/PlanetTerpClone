@@ -1,0 +1,359 @@
+.nav-link {
+  color: white !important;
+}
+
+.nav-link:hover {
+  color: lightblue !important;
+  transition: color 0.3s ease;
+}
+
+.green-text {
+  color: #28a745 !important;
+}
+
+.nav-link.green-text:hover {
+  color: lightgreen !important;
+}
+
+.bottom-bar {
+  position: fixed;
+  /* Fixes the bar at the bottom of the viewport */
+  bottom: 0;
+  /* Aligns the bar to the bottom edge */
+  left: 0;
+  /* Starts the bar from the left edge */
+  width: 100%;
+  /* Makes the bar span the full width of the page */
+  background-color: #000;
+  /* Sets the background color to black */
+  display: flex;
+  /* Makes the content inside the bar flexible */
+  align-items: center;
+  /* Vertically centers the items inside the bar */
+  justify-content: flex-start;
+  /* Aligns items to the left side */
+  padding: 10px;
+  /* Adds padding around the content */
+}
+
+.circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin: 0 5px;
+  cursor: pointer;
+  border: 1px solid white;
+}
+
+.circle.light-mode {
+  background-color: white;
+  /* White circle */
+}
+
+.circle.dark-mode {
+  background-color: black;
+  /* Black circle */
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #323133;
+  color: #ddd;
+}
+
+body.dark-mode .navbar {
+  background-color: rgb(34, 33, 33) !important;
+}
+
+#home {
+  text-align: center;
+  /* Center text horizontally */
+  padding-top: 20px;
+  /* Add space at the top */
+  margin: 0 auto;
+  /* Center the content within the container */
+}
+
+#home .heading {
+  font-size: 2.5rem;
+  /* Adjust as needed */
+  margin-bottom: 10px;
+  /* Space between heading and subheading */
+}
+
+#home h3 {
+  font-size: 1.5rem;
+  /* Adjust as needed */
+  margin: 0;
+}
+
+#course-section {
+  text-align: center;
+  /* Center text horizontally */
+  padding-top: 80px;
+  /* Add space at the top */
+  margin: 0 auto;
+  /* Center the content within the container */
+}
+
+#prof-section {
+  padding: 80px;
+}
+
+.search-container {
+  display: flex;
+  /* Aligns items in a row */
+  align-items: center;
+  /* Vertically centers the input and button */
+  justify-content: center;
+  /* Horizontally centers the entire container */
+  gap: 10px;
+  /* Adds space between the input and button */
+}
+
+.search-bar {
+  width: 100%;
+  /* Makes the input take up available space */
+  max-width: 400px;
+  /* Optional: Sets a maximum width */
+  padding: 10px; /* Adds padding around the content */
+  /* Adds padding for better usability */
+  border: 2px solid #ccc;
+  /* Optional: Custom border styling */
+  border-radius: 5px;
+  /* Rounds the corners */
+}
+
+.btn {
+  padding: 10px 20px;
+  /* Sets padding for the button */
+  border: none;
+  cursor: pointer;
+  background-color: #007bff;
+  /* Button color */
+  color: white;
+  border-radius: 4px;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+  /* Hover effect for button */
+}
+
+.format {
+  display: flex;
+  /* Enable Flexbox */
+  justify-content: flex-start;
+  /* Align content to the left horizontally */
+  align-items: flex-start;
+  /* Align content to the top vertically */
+  height: auto;
+  /* Full viewport height */
+  margin-left: 65px;
+  /* Push content slightly to the left */
+  padding-top: 110px;
+  /* Push content slightly down */
+  text-align: left;
+  /* Align text content to the left */
+  max-width: 1280px;
+}
+
+.center-grades {
+  display: flex;
+  /* Enable Flexbox */
+  justify-content: center;
+  /* Center horizontally */
+  align-items: center;
+  /* Center vertically */
+  height: 100vh;
+  /* Take full viewport height */
+  margin: 0 auto;
+  /* Center horizontally in case of fixed width */
+  padding: 0;
+  /* Remove unnecessary padding */
+  max-width: 1280px;
+  /* Restrict the maximum width */
+  transform: none;
+  /* Remove translateY if centering with Flexbox */
+  box-sizing: border-box;
+  /* Ensure padding/margins don't affect width */
+}
+
+.heading {
+  font-size: 30px;
+}
+
+body {
+  padding-bottom: 200px;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+  /* Show only the active section */
+}
+
+#home .dropdown {
+  border: 1px solid #ccc;
+  background-color: white;
+  max-height: 150px;
+  overflow-y: auto;
+  width: 250px;
+  position: absolute;
+  z-index: 1000;
+  display: none;
+  position: absolute;
+  top: 100%;
+  width: 398px;
+  margin-right: 98px;
+}
+
+.dropdown {
+  border: 1px solid #ccc;
+  background-color: white;
+  max-height: 150px;
+  overflow-y: auto;
+  width: 250px;
+  position: absolute;
+  z-index: 1000;
+  display: none;
+  position: absolute;
+  /* top: 100%; 
+    width: 398px;  */
+  margin-right: 98px;
+}
+
+.dropdown-item {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f1f1;
+}
+
+/* Styling the input field */
+/* Optional: Add a hover effect */
+.search-bar:hover {
+  border-color: #888;
+  /* Change border color on hover */
+}
+
+/* Optional: Add a focus effect */
+.search-bar:focus {
+  outline: none;
+  /* Remove the default outline */
+  border-color: #007bff;
+  /* Highlight border on focus */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  /* Add glow on focus */
+}
+
+/* Center the text and search bar */
+#home h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  /* Add space below the heading */
+}
+
+.dropdown-toggle {
+  background-color: #3b82f6;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 150px;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px;  /* Adds padding around the content */
+  color: #444;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dropdown-menu a:hover {
+  background-color: #f1f1f1;
+}
+
+.tabs {
+  display: flex;
+  align-items: flex-end;
+  /* Align buttons to the bottom */
+  gap: 10px;
+  /* Add space between buttons */
+  border-bottom: 2px solid white;
+  /* Line under tabs */
+}
+
+.tab {
+  background: transparent;
+  color: white;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 10px 15px;
+}
+
+
+.tab.active {
+  border-bottom: 2px solid white;
+  font-weight: bold;
+}
+
+#reviews-page, #reviews, #settings {
+  text-align: center;
+  /* Center text horizontally */
+  padding-top: 80px;
+  /* Add space at the top */
+  margin: 0 auto;
+  /* Center the content within the container */
+}
+
+.review-header, .review-row {
+  display: flex;
+  width: 80%;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Only apply borders to the header */
+.review-header {
+  border-top: 2px solid white;
+  border-bottom: 2px solid white;
+  padding: 10px 0;
+  margin-top: 20px;
+}
+
+.review-info-header, .review-text-header {
+  padding: 0 10px;
+}
+
+.review-info-header, .review-info {
+  width: 30%;
+  padding: 10px;  /* Adds padding around the content */
+}
+
+.review-text-header, .review-text {
+  width: 70%;
+  padding: 10px;  /* Adds padding around the content */
+}

@@ -1,0 +1,706 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanetTerpClone</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+
+<body>
+  <!-- Bootstrap Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="#" onclick="showSection('home')">
+      <img src="{% static 'logo.png' %}" alt="Logo" width="40">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('about')">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('grades')">Grades</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('tools')">Tools</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">API</a></li>
+        <li class="nav-item"><a class="nav-link" href="https://github.com/Cha04ic" target="_blank">GitHub</a></li>
+        <li class="nav-item"><a class="green-text nav-link" href="#">Add Professor/TA</a></li>
+      </ul>
+      {% if user.is_authenticated %}
+      <div class="user-dropdown" style="position: relative; display: inline-block; margin-right: 10px;">
+        <button onclick="toggleDropdown()" class="dropbtn">
+          {{ user.username }} &#x25BE;
+        </button>
+        <div id="dropdown-content"
+          style="display: none; position: absolute; background-color: rgb(228, 223, 223); box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 1; min-width: 150px">
+          <a href="#" style="display: block; margin-left: 10px" onclick="showSection('user-reviews'); loadReviews(this)">Your Reviews</a>
+          <a href="#" style="display: block; margin-left: 10px">Settings</a>
+          <a href="#" onclick="document.getElementById('logout-form').submit();"
+            style="display: block; margin-left: 10px; color: #0066ff;">Logout</a>
+        </div>
+      </div>
+      <form method="post" action="{% url 'logout' %}" id="logout-form" style="display: none;">
+        {% csrf_token %}
+      </form>
+      {% else %}
+      <a class="nav-link text-white mr-2" href="#" onclick="showSection('login')">Login / Register</a>
+      {% endif %}
+      <form class="form-inline">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search">
+        <button class="btn btn-outline-light" type="submit">Search</button>
+      </form>
+    </div>
+  </nav>
+
+
+  <div id="home" class="main section active">
+    <div>
+      <h1 class="heading">Welcome to PlanetTerpClone!</h1>
+      <h3>a community for terps at UMD</h3>
+    </div>
+    <div>
+      <div style="height: 30px;"></div>
+      <h2>
+        Search for a course, professor, or teaching assistant
+      </h2>
+      <div class="search-container" style="position: relative;">
+        <input id="combinedInput" class="search-bar" type="text" placeholder="Search">
+        <ul class="dropdown"></ul>
+        <button id="search-button" class="btn btn-outline-light" onclick="loadReviews(this)">Search</button>
+      </div>
+      <div style="margin-top: 40px;">
+        <h2>PlanetTerpClone includes...</h2>
+        <p>{{ course_count|intcomma }} courses</p>
+        <p>{{ professor_count|intcomma }} professors</p>
+        <p>{{ review_count|intcomma }} reviews</p>
+        <p>{{ grade_count|intcomma }} course grades</p>
+      </div>
+      <div>
+        <h4>Showing grade data for <a id="grade-target" href="#">...</a></h4>
+        <canvas class="gradeChart" style="width: 800px; margin: 0 auto; max-height: 1000px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div id="course-section" class="main section">
+    <h1 class="query"></h1>
+    <h3 class="course-title"></h3>
+    <div style="display: flex; justify-content: center;">
+      <div style="width:50%;">
+        <h6 class="course-desc"></h6>
+      </div>
+    </div>
+    <button class="btn btn-outline-light" onclick="showSection('reviews-page')">Reviews for this
+      course</button>
+  </div>
+
+  <div id="reviews-page" class="main section">
+    <h1>Reviews for <span class="query"></span></h1>
+    <button class="btn btn-outline-light" onclick="addReview()" style="padding: 10px;">Add a review</button>
+    <form id="review-form" style="display: none; margin-top: 20px;">
+      {% csrf_token %}
+      <select name="course" id="select" required>
+      </select>
+      <select name="grade" id="grade-select" required>
+        <option value="" disabled selected hidden>Select Grade</option>
+        <option value="A">A</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B">B</option>
+        <option value="B-">B-</option>
+        <option value="C+">C+</option>
+        <option value="C">C</option>
+        <option value="C-">C-</option>
+        <option value="D+">D+</option>
+        <option value="D">D</option>
+        <option value="D-">D-</option>
+        <option value="F">F</option>
+        <option value="P">P</option>
+        <option value="W">W</option>
+        <option value="XF">XF</option>
+      </select>
+      <select name="rating" id="rating-select" required>
+        <option value="">Rating</option>
+        <option value="1">⭐</option>
+        <option value="2">⭐⭐</option>
+        <option value="3">⭐⭐⭐</option>
+        <option value="4">⭐⭐⭐⭐</option>
+        <option value="5">⭐⭐⭐⭐⭐</option>
+      </select>
+      <textarea name="comment" id="review-textarea" placeholder="Write your review here..."
+        style="width: 60%; height: 100px; display: block; margin: 0 auto; text-align: center"></textarea>
+      <div>
+        <label><input type="checkbox" id="anonymous"> Post Anonymously</label>
+      </div>
+      <button class="btn btn-primary">Submit</button>
+    </form>
+    <div id="review-container">
+      <div class="review-header">
+        <div class="review-info-header">
+          <h6>Information</h6>
+        </div>
+        <div class="review-text-header">
+          <h6>Review</h6>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="about" class="main format section">
+    <div>
+      <h1 class="heading">
+        About
+      </h1>
+      <p>
+        PlanetTerp is a website designed to help students at the University of Maryland — College Park (UMD)
+        make informed decisions. We provide a professor review system, grade data for courses and professors,
+        and various tools which aggregate data about UMD and its courses. We hope that you find these features useful!
+      </p>
+      <h1 class="heading">
+        Goal
+      </h1>
+      <p>
+        Our goal is to provide information that will help all students at UMD make informed decisions.
+      </p>
+      <h1 class="heading">
+        Review Writing Tips
+      </h1>
+      <p>
+        If you're not sure what to write, here are some suggestions to get you started:
+      <ul>
+        <li>Did you think the exams or other major assignments were fair?</li>
+        <li>Did you think the professor had reasonable expectations?</li>
+        <li>Were you a fan of the professor's teaching style?</li>
+        <li>Was the workload appropriate for the number of credits?</li>
+        <li>Was this course a waste of time or beneficial in some way?</li>
+        <li>How much support were you given throughout the semester?</li>
+      </ul>
+      You're welcome to write your review in anyway you see fit, but here are a few tips to maximize your review's
+      readablility and usefulness:
+      <ul>
+        <li>Clearly structure your thoughts through a pros and cons list, spaced-out paragraphs, or another format of
+          your choosing. The community will thank you.</li>
+        <li>Try to avoid excessive use of caps lock. We promise you, whatever you want to write can be written without
+          caps lock!</li>
+      </ul>
+      While anyone is free to submit a review, anonymously or otherwise, all reviews are manually verified by us before
+      being displayed on the site. Below are some common reasons reviews get rejected:
+      <ul>
+        <li>Reviews like "really bad", "horrible", or "awesome professor" aren't helpful. Elaborate on why you feel this
+          way about the professor! Remember: users who read your review haven't taken this professor and are relying on
+          YOU to help them make an informed decision.</li>
+        <li>Excessive hostility towards a professor. Negativity or criticism is fine, but insults or accusations are
+          unlikely to lead to an accepted review.</li>
+        <li>Excessive/unnecessary profanity or any discriminatory language. We won't reject your review for a few swear
+          words, but do try to keep it to a minimum.</li>
+      </ul>
+      <h1 class="heading">Review Accuracy</h1>
+      <p>
+        A common concern with professor review websites is that the reviews aren't necessarily accurate to real life,
+        because a student with a negative experience is more likely to leave a review than a student with a positive
+        experience. This may certainly be true, and you should take this into account when considering reviews.
+        Additionally, be especially wary of trusting the rating of a professor with a low number of reviews.
+      </p>
+      <h1 class="heading">Source Code</h1>
+      <p>
+        PlanetTerp is completely open source! Check out our GitHub. Contributions and/or feature requests are welcome.
+      </p>
+      <h1 class="heading">
+        Credits
+      </h1>
+      <p>
+        Professor and course information comes from a combination of the Schedule of Classes and umd.io. Grade data is
+        obtained from the IRPA via a PIA request. Initial reviews were imported from OurUMD, and initial grade data was
+        from VA Grades.
+      </p>
+      </p>
+    </div>
+  </div>
+
+
+  <!-- Grades Section -->
+  <div style="height: 100px;"></div> <!-- Spacer -->
+  <div id="grades" class="main center-grades section">
+    <h1 style="text-align: center;">Historical Grade Lookup</h1>
+    <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+      <!-- Search by Course -->
+      <div>
+        <h2>Lookup by course</h2>
+        <input id="courseInput0" type="text" placeholder="Search for a course..."
+          style="width: 250px; height: 40px; font-size: 18px;" required>
+        <ul class="dropdown" style="border: 1px solid #ccc; display: none; position: absolute;"></ul>
+      </div>
+      <!-- Search by Professor -->
+      <div>
+        <h2>Lookup by professor</h2>
+        <input id="profInput0" type="text" placeholder="Search for a professor..."
+          style="width: 250px; height: 40px; font-size: 18px;" required>
+        <ul class="dropdown" style="border: 1px solid #ccc; display: none; position: absolute;"></ul>
+      </div>
+    </div>
+    <p style="margin-top: 40px; text-align: center; font-size: 0.9em; margin-left: -120px;">
+      Data is not guaranteed to be correct. "W"s are considered to be 0.0 quality points.
+      "Other" grades are not factored into GPA calculation.
+    </p>
+    <div>
+      <canvas class="gradeChart" style="width: 800px; margin: 0 auto; max-height: 1000px"></canvas>
+    </div>
+  </div>
+
+
+  <div id="login" class="main section">
+    <div style="margin-left: 25%">
+      <h2>Login</h2>
+      <form id="login-form" method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <label>Username</label><br>
+        <input type="text" id="user-login" placeholder="Username" required><br><br>
+        <p id="login-error" style="color: red;"></p>
+        <label>Password</label><br>
+        <input type="password" id="pw-login" placeholder="Password" required><br><br>
+        <p id="login-error" style="color: red;"></p>
+        <button type="submit">Login</button>
+        <a href="#">Forgot Password?</a>
+      </form>
+    </div>
+    <div style="margin-left: 60%; margin-top: -15%">
+      <h2>Register</h2>
+      <form id="register-form" method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        <label for="user-reg">Username</label><br>
+        <input type="text" id="user-reg" name="username" placeholder="Username" required><br>
+        <small style="color: grey;">Once a username is set, it cannot be changed</small><br><br>
+        <p id="register-error" style="color: red;"></p>
+        <label for="email">Email</label><br>
+        <input type="email" id="email" name="email" placeholder="Email (optional)"><br><br>
+
+        <label for="pw-reg">Password</label><br>
+        <input type="password" id="pw-reg" name="password" placeholder="Password" required><br><br>
+
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="user-reviews" class="main section">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab(this, 'reviews')">Your Reviews</button>
+      <button class="tab" onclick="showTab(this, 'settings')">Settings</button>
+    </div>
+    <div id="reviews" class="tab-content section active">
+      <h1>Your Reviews</h1>
+      <div id="review-container2">
+        <div class="review-header">
+          <div class="review-info-header">
+            <h6>Information</h6>
+          </div>
+          <div class="review-text-header">
+            <h6>Review</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="settings" class="tab-content section">
+      <h1>Settings</h1>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="circle light-mode" onclick="toggleLightMode()"></div>
+    <div class="circle dark-mode" onclick="toggleDarkMode()"></div>
+  </div>
+
+  <script src="{% static 'search_combined.js' %}"></script>
+  <script>
+    function toggleDropdown() {
+      const menu = document.getElementById("dropdown-content");
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+
+    window.onclick = function (e) {
+      if (!e.target.matches('.dropbtn')) {
+        const menu = document.getElementById("dropdown-content");
+        if (menu && menu.style.display === "block") {
+          menu.style.display = "none";
+        }
+      }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.add('dark-mode');
+    }
+
+    function toggleLightMode() {
+      document.body.classList.remove('dark-mode');
+    }
+
+    function showSection(sectionID) {
+      // Hide all sections
+      document.querySelectorAll('.main.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      // Show the selected section
+      document.getElementById(sectionID).classList.add('active');
+    }
+
+    function showTab(button, ID) {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      })
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      })
+      button.classList.add('active');
+      document.getElementById(ID).classList.add('active');
+    }
+    // Array of suggestions
+    const suggestions = ["ur mom", "Jane Doe",
+      "CMSC131", "PHYS121", "CHEM135",
+      "Mathematics Department", "Computer Science Department",
+      "John Doe", "Jane Smith", "Jon Snow", "Tyrion Lannister", "Daenerys Targaryen", "Robert Baratheon", "Ging Freecs", "Killua Zoldyck",
+      "TA Alex Johnson", "TA Emily Davis"
+    ];
+    const searchBar = document.querySelector(".search-bar");
+    let index = 0;
+    let cursorVisible = true;
+
+    function typeText(text, i = 0) {
+      if (i < text.length) {
+        searchBar.placeholder = text.substring(0, i + 1) + "|";
+        setTimeout(() => typeText(text, i + 1), 100);
+      } else {
+        setTimeout(() => deleteText(text), 2000);
+      }
+    }
+
+    function deleteText(text, i = text.length) {
+      if (i >= 0) {
+        searchBar.placeholder = text.substring(0, i) + "|";
+        setTimeout(() => deleteText(text, i - 1), 50);
+      } else {
+        index = (index + 1) % suggestions.length;
+        setTimeout(() => typeText(suggestions[index]), 500);
+      }
+    }
+
+    function blinkCursor() {
+      cursorVisible = !cursorVisible;
+      if (searchBar.placeholder.endsWith("|")) {
+        searchBar.placeholder = searchBar.placeholder.slice(0, -1);
+      } else {
+        searchBar.placeholder += "|";
+      }
+    }
+
+    typeText(suggestions[index]);
+    setInterval(blinkCursor, 500);
+
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
+      e.preventDefault();  // Prevent normal form submission
+
+      const username = document.getElementById('user-login').value;
+      const password = document.getElementById('pw-login').value;
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      const response = await fetch('{% url "login" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrfToken,
+        },
+        body: new URLSearchParams({
+          username: username,
+          password: password,
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.location.href = '/';  // Redirect on success
+      } else {
+        document.getElementById('login-error').textContent = data.error;
+      }
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async function (e) {
+      e.preventDefault();  // Prevent normal form submission
+
+      const username = document.getElementById('user-reg').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('pw-reg').value;
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      const response = await fetch('{% url "register" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrfToken,
+        },
+        body: new URLSearchParams({
+          username: username,
+          email: email,
+          password: password,
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.location.href = '/';  // Redirect on successful registration
+      } else {
+        console.log("bababooey");
+        document.getElementById('register-error').textContent = data.error;
+      }
+    });
+
+    function isCourseCode(query) {
+      return /^[A-Z]{4}\d{3}[A-Z]?$/.test(query.toUpperCase());
+    }
+
+    //dynamically handles the review page
+    searchButton.addEventListener("click", () => {
+      const gradeTarget = document.getElementById("grade-target");
+      const searchInput = document.getElementById("combinedInput");
+      const query = searchInput.value.trim();
+      if (query !== "") {
+        document.querySelectorAll(".query").forEach(e => {
+          e.textContent = query;
+        });
+        if (isCourseCode(query)) {
+          // Fetch course info from PlanetTerp API
+          fetch(`https://planetterp.com/api/v1/course?name=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+              document.querySelectorAll(".course-title").forEach(e => {
+                e.textContent = `${data.title}`;
+              });
+              const formattedDescription = data.description
+                .replace(/<b>([^<]*)<\/b>/g, '<p><strong>$1</strong>')  // Wrap label in <p><strong>
+                .replace(/(?<=<\/strong>)([^<]*)/g, '$1</p>');          // Close </p> after the text
+              document.querySelectorAll(".course-desc").forEach(e => {
+                e.innerHTML = formattedDescription;
+              });
+            }).catch(err => {
+              console.error("Error fetching course data:", err);
+            });
+          gradeTarget.onclick = () => {
+            showSection("course-section");
+            fetch(`/filter_profs/${encodeURIComponent(query)}/`).then
+              (response => response.json()).then(data => {
+                const select = document.getElementById("select");
+                select.innerHTML = "";
+                const placeholder = document.createElement("option");
+                placeholder.disabled = true;
+                placeholder.selected = true;
+                placeholder.hidden = true;
+                placeholder.textContent = "Select Professor";
+                select.appendChild(placeholder);
+                data.profs.forEach(prof => {
+                  const option = document.createElement("option");
+                  option.value = prof;
+                  option.textContent = prof;
+                  select.appendChild(option);
+                })
+              }).catch(error => console.error("Error fetching professors:", error));
+            return false;
+          };
+        } else {
+          const slug = query.trim().toLowerCase().replace(/\s+/g, '-');
+          gradeTarget.onclick = () => {
+            showSection("reviews-page");
+            fetch(`/filter_courses/${encodeURIComponent(query)}/`).then
+              (response => response.json()).then(data => {
+                const select = document.getElementById("select");
+                select.innerHTML = "";
+                const placeholder = document.createElement("option");
+                placeholder.disabled = true;
+                placeholder.selected = true;
+                placeholder.hidden = true;
+                placeholder.textContent = "Select Course";
+                select.appendChild(placeholder);
+                data.courses.forEach(course => {
+                  const option = document.createElement("option");
+                  option.value = course;
+                  option.textContent = course;
+                  select.appendChild(option);
+                })
+              }).catch(error => console.error("Error fetching courses:", error));
+            return false;
+          }
+        }
+        gradeTarget.textContent = query;
+      }
+    });
+
+    function addReview() {
+      if ("{{ request.user.is_authenticated|yesno:'true,false' }}" !== "true") {
+        alert("You must be logged in to add a review.");
+        return;
+      }
+      const form = document.getElementById("review-form");
+      if (form.style.display === "none" || form.style.display === "") {
+        form.style.display = "block";
+      } else {
+        form.style.display = "none";
+      }
+    }
+
+    document.getElementById("review-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const query = document.getElementById("combinedInput").value.trim();
+      const selection = document.getElementById("select").value;
+      const grade = document.getElementById("grade-select").value;
+      const comment = document.getElementById("review-textarea").value;
+      const rating = document.getElementById("rating-select").value;
+      const anonymous = document.getElementById("anonymous").checked;
+      let course, professor;
+
+      if (isCourseCode(query)) {
+        course = query;
+        professor = selection;
+      } else {
+        professor = query;
+        course = selection;
+      }
+
+      console.log(course, professor, grade, comment, rating);
+
+      fetch("add/", {
+        method: "POST", headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": getCSRFToken(),
+        }, body: new URLSearchParams({
+          course, professor, grade, comment, rating, anonymous
+        }),
+      }).then((response) => {
+        if (!response.ok) throw new Error("failed to submit review");
+        return response.json();
+      }).then((data) => {
+        addReviewToDOM(data);
+        form.reset();
+        form.style.display = "none";
+      }).catch((err) => {
+        console.error("Submission failed: ", err);
+      });
+    });
+
+    // Helper to grab CSRF token
+    function getCSRFToken() {
+      return document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("csrftoken="))
+        ?.split("=")[1];
+    }
+
+    // Function to dynamically add review to DOM
+    function addReviewToDOM(data) {
+      const reviewRow = document.createElement("div");
+      reviewRow.classList.add("review-row");
+      const reviewInfo = document.createElement("div");
+      reviewInfo.classList.add("review-info");
+
+      reviewInfo.innerHTML = `
+        ${data.professor}<br>
+        ${data.course}<br>
+        ${"★".repeat(data.rating)}${"☆".repeat(5 - data.rating)}<br>
+        Expecting ${data.grade}<br>
+        ${data.author}<br>
+        ${data.date_posted}
+      `;
+      const reviewText = document.createElement("div");
+      reviewText.classList.add("review-text");
+      reviewText.textContent = data.comment;
+      reviewRow.appendChild(reviewInfo);
+      reviewRow.appendChild(reviewText);
+      document.getElementById("review-container").appendChild(reviewRow);
+    }
+
+    function loadReviews(element) {
+      const query = document.getElementById("combinedInput").value;
+      const isCourse = isCourseCode(query);
+      if (element.textContent.includes("Search")) {
+        fetch(`load/?query=${encodeURIComponent(query)}&is_course=${isCourse}&filter=true`).then((response) => {
+            if (!response.ok) throw new Error("Failed to load reviews");
+            return response.json();
+          }).then((reviews) => {
+            const container = document.getElementById("review-container");
+            [...container.children].forEach(child => {
+              if (!child.classList.contains("review-header")) {
+                container.removeChild(child);
+              }
+            });
+            reviews.forEach((data) => {
+              const reviewRow = document.createElement("div");
+              reviewRow.classList.add("review-row");
+              const reviewInfo = document.createElement("div");
+              reviewInfo.classList.add("review-info");
+              reviewInfo.innerHTML = `
+                  ${data.professor}<br>
+                  ${data.course}<br>
+                  ${"★".repeat(data.rating)}${"☆".repeat(5 - data.rating)}<br>
+                  Expecting ${data.grade}<br>
+                  ${data.author}<br>
+                  ${data.date_posted}<br>
+                `;
+              const reviewText = document.createElement("div");
+              reviewText.classList.add("review-text");
+              reviewText.textContent = data.comment;
+              reviewRow.appendChild(reviewInfo);
+              reviewRow.appendChild(reviewText);
+              container.appendChild(reviewRow);
+            });
+          }).catch((err) => {
+            console.error("Error loading reviews: ", err);
+          });
+      } else {
+        fetch(`load/`).then((response) => {
+          if (!response.ok) throw new Error ("Failed to load reviews");
+          return response.json();
+        }).then((reviews) => {
+            const container = document.getElementById("review-container2");
+            [...container.children].forEach(child => {
+              if (!child.classList.contains("review-header")) {
+                container.removeChild(child);
+              }
+            });
+            reviews.forEach((data) => {
+              const reviewRow = document.createElement("div");
+              reviewRow.classList.add("review-row");
+              const reviewInfo = document.createElement("div");
+              reviewInfo.classList.add("review-info");
+              reviewInfo.innerHTML = `
+                  ${data.professor}<br>
+                  ${data.course}<br>
+                  ${"★".repeat(data.rating)}${"☆".repeat(5 - data.rating)}<br>
+                  Expecting ${data.grade}<br>
+                  ${data.author}<br>
+                  ${data.date_posted}<br>
+                `;
+              const reviewText = document.createElement("div");
+              reviewText.classList.add("review-text");
+              reviewText.textContent = data.comment;
+              reviewRow.appendChild(reviewInfo);
+              reviewRow.appendChild(reviewText);
+              container.appendChild(reviewRow);
+            });
+          }).catch((err) => {
+            console.error("Error loading reviews: ", err);
+          });
+      }
+    }
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!--<script src="{% static 'search_courses.js' %}"></script>
+  <script src="{% static 'search_profs.js' %}"></script>-->
+  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

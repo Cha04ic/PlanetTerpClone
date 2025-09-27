@@ -1,0 +1,14 @@
+Django:
+
+    python manage.py flush -> flushes db
+    python manage.py shell -> opens shell
+
+    python manage.py makemigrations -> Updates the db
+    python manage.py migrate -----------^
+
+    python manage.py startapp [folder_name] -> starts a new app
+
+    python manage.py runserver -> runs the server
+
+
+
